@@ -8,7 +8,8 @@ import com.github.roarappstudio.btkontroller.senders.RelativeMouseSender
 import java.util.*
 import kotlin.concurrent.schedule
 
-class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
+class GestureDetectListener(val rMouseSender: RelativeMouseSender) :
+    GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
 
     val TAP = 0
     val DOUBLE_TAP = 1
@@ -23,34 +24,32 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
     private var mPtrCount = 0
 
 
-    private var possibleTwoFingerTapFlag =0
-    private var mPossibleTwoFingerTapStartTime=System.currentTimeMillis()
+    private var possibleTwoFingerTapFlag = 0
+    private var mPossibleTwoFingerTapStartTime = System.currentTimeMillis()
     private var mPrimStartTouchEventX = 0f
     private var mPrimStartTouchEventY = 0f
     private var mSecStartTouchEventX = 0f
     private var mSecStartTouchEventY = 0f
     private var mPrimSecStartTouchDistance = 0f
-    private var notAConfirmedDoubleTapFlag=0
-    private var disableSingleTapFlag=0
-    private var previousScrollX : Float = 0f
-    private var previousScrollY : Float = 0f
+    private var notAConfirmedDoubleTapFlag = 0
+    private var disableSingleTapFlag = 0
+    private var previousScrollX: Float = 0f
+    private var previousScrollY: Float = 0f
 
 
-    private var testerp1=0
-    private var testerp2 =0
-    private var stopScrollFlag=0
+    private var testerp1 = 0
+    private var testerp2 = 0
+    private var stopScrollFlag = 0
 
     internal var downTimestamp = System.currentTimeMillis()
     fun onTouchEvent(ev: MotionEvent?): Boolean {
-        if(ev !=null) {
+        if (ev != null) {
             val action = ev.action and MotionEvent.ACTION_MASK
-            if(ev.pointerCount==1)
-            {
-                if(stopScrollFlag==1)
-                {
-                    rMouseSender.mouseReport.hScroll=0
-                    rMouseSender.mouseReport.vScroll=0
-                    stopScrollFlag=0
+            if (ev.pointerCount == 1) {
+                if (stopScrollFlag == 1) {
+                    rMouseSender.mouseReport.hScroll = 0
+                    rMouseSender.mouseReport.vScroll = 0
+                    stopScrollFlag = 0
                 }
 
             }
@@ -62,8 +61,8 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
                     mPtrCount++
                     if (ev.pointerCount > 1) {
 
-                        testerp1=ev.getPointerId(0)//remove at end of testing
-                        testerp2=ev.getPointerId(1)
+                        testerp1 = ev.getPointerId(0)//remove at end of testing
+                        testerp2 = ev.getPointerId(1)
 
 
 
@@ -98,6 +97,7 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
                         return true
                     }
                 }
+
                 MotionEvent.ACTION_POINTER_UP -> mPtrCount--
                 MotionEvent.ACTION_DOWN -> {
 
@@ -105,20 +105,20 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
 
                     mPossibleTwoFingerTapStartTime = System.currentTimeMillis()
                 }
+
                 MotionEvent.ACTION_UP -> {
                     mPtrCount--
 
-                    if(possibleTwoFingerTapFlag == 1)
-                    {
+                    if (possibleTwoFingerTapFlag == 1) {
                         possibleTwoFingerTapFlag = 0
 
-                    if (mPtrCount == 0 && ((System.currentTimeMillis() - mPossibleTwoFingerTapStartTime) <= ViewConfiguration.getTapTimeout()) ) {
+                        if (mPtrCount == 0 && ((System.currentTimeMillis() - mPossibleTwoFingerTapStartTime) <= ViewConfiguration.getTapTimeout())) {
 
-                        disableSingleTapFlag =1
-                        Log.i("thisistwofinger", "two finger single tap is implemented")
+                            disableSingleTapFlag = 1
+                            Log.i("thisistwofinger", "two finger single tap is implemented")
 
-                        rMouseSender.sendRightClick()
-                    }
+                            rMouseSender.sendRightClick()
+                        }
 
                     }
 
@@ -128,24 +128,26 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
         }
         return false
     }
-    override fun onDoubleTap(e: MotionEvent?): Boolean {
-        Log.i("doubleddht","this is on double tap $e")
+
+    override fun onDoubleTap(e: MotionEvent): Boolean {
+        Log.i("doubleddht", "this is on double tap $e")
 
         return false
     }
 
-    override fun onDoubleTapEvent(e: MotionEvent?): Boolean {
-        Log.i("doubleddhe","this is on double tap event $e")
-        if(mPtrCount==1)
-        {
-            if(e!=null) {
+    override fun onDoubleTapEvent(e: MotionEvent): Boolean {
+        Log.i("doubleddhe", "this is on double tap event $e")
+        if (mPtrCount == 1) {
+            if (e != null) {
                 if (e.action == MotionEvent.ACTION_DOWN)
                     Timer().schedule(150L) {
-                        if(mPtrCount==1)
-                        {
-                            notAConfirmedDoubleTapFlag=1;
+                        if (mPtrCount == 1) {
+                            notAConfirmedDoubleTapFlag = 1;
                             rMouseSender.sendLeftClickOn()
-                            Log.i("doubleddhtnew","this is on double tap and hold and also $DOUBLE_TAP_TIMEOUT and $e ")
+                            Log.i(
+                                "doubleddhtnew",
+                                "this is on double tap and hold and also $DOUBLE_TAP_TIMEOUT and $e "
+                            )
 
                         }
                     }
@@ -155,15 +157,14 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
 
 
         }
-        if(mPtrCount==0)
-        {
-            if(e!=null) {
+        if (mPtrCount == 0) {
+            if (e != null) {
                 if (e.action == MotionEvent.ACTION_UP) {
                     if (notAConfirmedDoubleTapFlag == 0) {
                         rMouseSender.sendDoubleTapClick()
                         Log.i("doubleddhtnew", "this is on double tap confirmed $e")
                     } else {
-                        notAConfirmedDoubleTapFlag=0
+                        notAConfirmedDoubleTapFlag = 0
                         rMouseSender.sendLeftClickOff()
 
 
@@ -175,44 +176,52 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
         return false
     }
 
-    override fun onSingleTapConfirmed(e: MotionEvent?): Boolean {
-        Log.i("doubleddhs","this is on single tap confirmed $e")
-        if(disableSingleTapFlag==1)
-        {
-            disableSingleTapFlag=0
-        }
-        else {
+    override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+        Log.i("doubleddhs", "this is on single tap confirmed $e")
+        if (disableSingleTapFlag == 1) {
+            disableSingleTapFlag = 0
+        } else {
             rMouseSender.sendTestClick()
         }
         return false
     }
 
-    override fun onSingleTapUp(e: MotionEvent?): Boolean {
-        Log.i("doubleddhu","this is on single tap up $e")
+    override fun onSingleTapUp(e: MotionEvent): Boolean {
+        Log.i("doubleddhu", "this is on single tap up $e")
         //
         return true
     }
 
-    override fun onDown(e: MotionEvent?): Boolean {
+    override fun onDown(e: MotionEvent): Boolean {
         Log.d("ggkjh", "onDown: $e")
-       return false
+        return false
 
     }
 
-    override fun onFling(e1: MotionEvent?, e2: MotionEvent?, velocityX: Float, velocityY: Float): Boolean {
-       Log.i("this is a fling e1 ","$e1")
-        Log.i("this is a fling e2 ","$e2")
-        Log.i("this is a fling vx ","$velocityX")
-        Log.i("this is a fling vy ","$velocityY")
+    override fun onFling(
+        e1: MotionEvent,
+        e2: MotionEvent,
+        velocityX: Float,
+        velocityY: Float
+    ): Boolean {
+        Log.i("this is a fling e1 ", "$e1")
+        Log.i("this is a fling e2 ", "$e2")
+        Log.i("this is a fling vx ", "$velocityX")
+        Log.i("this is a fling vy ", "$velocityY")
 
 
         return false
     }
 
-    override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+    override fun onScroll(
+        e1: MotionEvent,
+        e2: MotionEvent,
+        distanceX: Float,
+        distanceY: Float
+    ): Boolean {
 
 
-        if(mPtrCount==2) {
+        if (mPtrCount == 2) {
 
 //            var dy :Int = distanceY.roundToInt()
 //            if (dy> 127) dy=127
@@ -225,19 +234,17 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
 //
 //            rMouseSender.sendScroll(dy,dx)
 
-            var dy: Int =0
-            var dx :Int =0
-            if(distanceY>0) dy= -1
-
-            else if(distanceY<0) dy = 1
-            else if(distanceY==0f) dy=0
+            var dy: Int = 0
+            var dx: Int = 0
+            if (distanceY > 0) dy = -1
+            else if (distanceY < 0) dy = 1
+            else if (distanceY == 0f) dy = 0
             //else dy=0
 
-            if(distanceX>2) dx= 1
-
-            else if(distanceX<-2) dx = -1
+            if (distanceX > 2) dx = 1
+            else if (distanceX < -2) dx = -1
             //else if(distanceX==0f) dx=0
-            else dx=0
+            else dx = 0
 
 
             if (dx > 127) dx = 127
@@ -249,10 +256,10 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
 
 
 
-                rMouseSender.sendScroll(dy, dx)
+            rMouseSender.sendScroll(dy, dx)
 
 
-                stopScrollFlag=1
+            stopScrollFlag = 1
 //            if(e1?.getPointerId(0)==testerp1) {
 //
 //                Log.i("scroller", "This is e1 as $e1")
@@ -275,11 +282,11 @@ class GestureDetectListener(val rMouseSender : RelativeMouseSender) : GestureDet
         return false
     }
 
-    override fun onLongPress(e: MotionEvent?) {
+    override fun onLongPress(e: MotionEvent) {
 
     }
 
-    override fun onShowPress(e: MotionEvent?) {
+    override fun onShowPress(e: MotionEvent) {
 
     }
 
